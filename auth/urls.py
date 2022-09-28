@@ -1,8 +1,8 @@
 from django.urls import path
-from rest_framework_simplejwt.views import TokenRefreshView
-from .views import *
+from rest_framework_simplejwt import views as jwt_views
 
 urlpatterns = [
-    path('token/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('token/refresh/', TokenRefreshView.as_view(), name='token-refresh')
+    path('api/token/', jwt_views.TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/token/refresh/', jwt_views.TokenRefreshView.as_view(), name='token_refresh'),
+    path('api/token/refresh/blacklist', jwt_views.TokenBlacklistView.as_view(), name='token_blacklist')
 ]

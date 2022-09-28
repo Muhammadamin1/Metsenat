@@ -9,7 +9,7 @@ class StudentFilter(filters.FilterSet):
         model = Student
         fields = [
             'university',
-            'type'
+            'degree'
         ]
 
 

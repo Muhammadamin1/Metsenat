@@ -1,13 +1,25 @@
 from django.db.models import Count, Sum
+from django.db.models.functions import Coalesce
 from rest_framework import serializers
 
-from api.v1.application.serializers import ApplicationSerializer
 from user.models import *
+
+
+class UniversitySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = University
+        fields = [
+            'id',
+            'name',
+        ]
 
 
 # ---------------- STUDENT CRUD --------------------------
 
 class StudentListSerializer(serializers.ModelSerializer):
+    university = UniversitySerializer(read_only=True)
+    gained_money = serializers.SerializerMethodField()
+
     class Meta:
         model = Student
         fields = [
@@ -15,9 +27,15 @@ class StudentListSerializer(serializers.ModelSerializer):
             'full_name',
             'phone_number',
             'university',
-            'type',
+            'degree',
             'contract_amount',
+            'gained_money',
         ]
+
+    @staticmethod
+    def get_gained_money(student):
+        gained_money = student.sponsorships.aggregate(money_sum=Coalesce(Sum('money'), 0))['money_sum']
+        return gained_money
 
 
 class StudentCreateSerializer(serializers.ModelSerializer):
@@ -27,7 +45,7 @@ class StudentCreateSerializer(serializers.ModelSerializer):
             'full_name',
             'phone_number',
             'university',
-            'type',
+            'degree',
             'contract_amount',
         ]
 
@@ -40,7 +58,7 @@ class StudentRetrieveUpdateDestroySerializer(serializers.ModelSerializer):
             'full_name',
             'phone_number',
             'university',
-            'type',
+            'degree',
             'contract_amount',
         ]
 
@@ -49,6 +67,8 @@ class StudentRetrieveUpdateDestroySerializer(serializers.ModelSerializer):
 
 
 class SponsorListSerializer(serializers.ModelSerializer):
+    spent_money = serializers.SerializerMethodField()
+
     class Meta:
         model = Sponsor
         fields = [
@@ -58,13 +78,13 @@ class SponsorListSerializer(serializers.ModelSerializer):
             'type',
             'payment_amount',
             'organization',
+            'spent_money',
         ]
 
-    def to_representation(self, instance: Sponsor):
-        data = super(SponsorListSerializer, self).to_representation(instance)
-        data['application'] = ApplicationSerializer(instance.application.all(), context=self.context, many=True).data
-
-        return data
+    @staticmethod
+    def get_spent_money(sponsor):
+        spent_money = sponsor.sponsorships.aggregate(money_sum=Coalesce(Sum('money'), 0))['money_sum']
+        return spent_money
 
 
 class SponsorCreateSerializer(serializers.ModelSerializer):

@@ -4,26 +4,23 @@ from django.db import models
 from metsenat.models import BaseModel
 
 
-class User(AbstractUser):
-    username = models.CharField(max_length=50, unique=True)
-    phone = models.CharField(max_length=13)
-
-    REQUIRED_FIELDS = ['phone']
+class University(models.Model):
+    name = models.CharField(max_length=255, null=True)
 
     def __str__(self):
-        return self.username
+        return self.name
 
 
 class Student(BaseModel):
-    class Type(models.TextChoices):
+    class Degree(models.TextChoices):
         BACHELOR = 'Bakalavr'
         MASTER = 'Magister'
 
     full_name = models.CharField(max_length=200)
-    university = models.CharField(max_length=300)
-    type = models.CharField(max_length=10, choices=Type.choices, default=Type.BACHELOR)
+    university = models.ForeignKey(University, on_delete=models.CASCADE, related_name='students', null=True)
+    degree = models.CharField(max_length=10, choices=Degree.choices, default=Degree.BACHELOR)
     phone_number = models.CharField(max_length=13, blank=True, null=True, unique=True)
-    contract_amount = models.FloatField(default=0)
+    contract_amount = models.BigIntegerField(null=True)
 
     def __str__(self):
         return self.full_name
@@ -34,17 +31,12 @@ class Sponsor(BaseModel):
         PHYSICAL_PERSON = 'Jismoniy shaxs'
         LEGAL_PERSON = 'Yuridik shaxs'
 
-    student = models.ManyToManyField(Student, blank=True)
     full_name = models.CharField(max_length=200)
     phone_number = models.CharField(max_length=13, blank=True, null=True, unique=True)
     type = models.CharField(max_length=15, choices=Type.choices, default=Type.PHYSICAL_PERSON)
-    payment_amount = models.FloatField(default=0)
+    payment_amount = models.BigIntegerField(null=True)
     organization = models.CharField(max_length=150, blank=True, null=True)
 
     def __str__(self):
         return self.full_name
 
-    @property
-    def total_price(self):
-        queryset = self.student.all().aggregate(total_price=models.Sum('contract_amount'))
-        return queryset['total_price']

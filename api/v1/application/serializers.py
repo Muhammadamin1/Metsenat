@@ -1,8 +1,14 @@
 from rest_framework import serializers
+
+from api.v1.application.validators import validate_sponsorship_money_on_create
+from api.v1.user.serializers import StudentListSerializer, SponsorListSerializer
 from application.models import *
 
 
 class ApplicationSerializer(serializers.ModelSerializer):
+    student = StudentListSerializer(read_only=True)
+    sponsor = SponsorListSerializer(read_only=True)
+
     class Meta:
         model = Application
         fields = [
@@ -10,5 +16,9 @@ class ApplicationSerializer(serializers.ModelSerializer):
             'sponsor',
             'student',
             'status',
-            'spent_money',
+            'money',
         ]
+
+    def create(self, validated_data):
+        instance = validate_sponsorship_money_on_create(validated_data)
+        return instance

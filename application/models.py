@@ -4,13 +4,16 @@ from metsenat.models import BaseModel
 
 
 class Application(BaseModel):
-    class Status(models.TextChoices):
-        NEW = 'Yangi'
-        MODERATE = 'Modiratsiyada'
-        APPROVED = 'Tasdiqlangan'
-        CANCELED = 'Bekor qilingan'
-    status = models.CharField(max_length=15, choices=Status.choices, default=Status.NEW)
-    sponsor = models.ManyToManyField(Sponsor, related_name='application')
-    student = models.ManyToManyField(Student, related_name='application')
-    spent_money = models.FloatField(default=0)
+    STATUS_CHOICES = (
+        ('new', 'Yangi'),
+        ('processing', 'Moderatsiyada'),
+        ('approved', 'Tasdiqlangan'),
+        ('canceled', 'Bekor qilingan')
+    )
+    status = models.CharField(max_length=64, choices=STATUS_CHOICES, default='new')
+    sponsor = models.ForeignKey(Sponsor, related_name='sponsorships', on_delete=models.SET_NULL, null=True)
+    student = models.ForeignKey(Student, related_name='sponsorships', on_delete=models.CASCADE, null=True)
+    money = models.BigIntegerField(null=True)
 
+    def __str__(self):
+        return f'{self.sponsor.full_name} -- {self.student.full_name} : {self.money} so\'m'

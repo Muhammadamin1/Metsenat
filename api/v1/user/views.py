@@ -1,4 +1,6 @@
 from django.db.models import Q
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import SearchFilter
 from rest_framework.generics import *
 from .serializers import *
 from .filters import *
@@ -9,6 +11,7 @@ from .filters import *
 class StudentListAPIView(ListAPIView):
     serializer_class = StudentListSerializer
     filterset_backend = StudentFilter
+    filter_backends = [SearchFilter, DjangoFilterBackend]
 
     def get_queryset(self):
         queryset = Student.objects.all()
@@ -35,6 +38,7 @@ class StudentDetailUpdateDeleteAPIView(RetrieveUpdateDestroyAPIView):
 class SponsorListAPIView(ListAPIView):
     serializer_class = SponsorListSerializer
     filterset_backend = SponsorFilter
+    filter_backends = [SearchFilter, DjangoFilterBackend]
 
     def get_queryset(self):
         queryset = Sponsor.objects.all()
